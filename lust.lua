@@ -5,26 +5,6 @@
 local lust = {}
 lust.level = 0
 
-local function table_has(t, x)
-  for k, v in pairs(t) do
-    if v == x then return true end
-  end
-  return false
-end
-
-local function strict_eq(t1, t2)
-  if type(t1) ~= type(t2) then return false end
-  if type(t1) ~= 'table' then return t1 == t2 end
-  if #t1 ~= #t2 then return false end
-  for k, _ in pairs(t1) do
-    if not strict_eq(t1[k], t2[k]) then return false end
-  end
-  for k, _ in pairs(t2) do
-    if not strict_eq(t2[k], t1[k]) then return false end
-  end
-  return true
-end
-
 function lust.describe(name, fn)
   print(string.rep('\t', lust.level) .. name)
   lust.level = lust.level + 1
@@ -53,19 +33,39 @@ local function isa(v, x)
   return false, 'invalid type ' .. tostring(x)
 end
 
+local function has(t, x)
+  for k, v in pairs(t) do
+    if v == x then return true end
+  end
+  return false
+end
+
+local function strict_eq(t1, t2)
+  if type(t1) ~= type(t2) then return false end
+  if type(t1) ~= 'table' then return t1 == t2 end
+  if #t1 ~= #t2 then return false end
+  for k, _ in pairs(t1) do
+    if not strict_eq(t1[k], t2[k]) then return false end
+  end
+  for k, _ in pairs(t2) do
+    if not strict_eq(t2[k], t1[k]) then return false end
+  end
+  return true
+end
+
 local paths = {
   [''] = {'to'},
   to = {'have', 'equal', 'be', 'exist'},
   be = {'a', 'an', 'truthy', 'falsy', f = function(v, x)
-    return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal!'
+    return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal!'
   end},
   a = {f = isa},
   an = {f = isa},
   exist = {f = function(v) return v == nil, tostring(v) .. ' is nil!' end},
   truthy = {f = function(v) return v, tostring(v) .. ' is not truthy!' end},
   falsy = {f = function(v) return not v, tostring(v) .. ' is not falsy!' end},
-  equal = {f = function(v, x) return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal!' end},
-  have = {f = function(v, x) return v[x], 'table does not have key ' .. tostring(x)  end}
+  equal = {f = function(v, x) return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal!' end},
+  have = {f = function(v, x) return has(v, x), 'table "' .. tostring(v) .. '" does not have ' .. tostring(x) end}
 }
 
 function lust.expect(v)
@@ -75,7 +75,7 @@ function lust.expect(v)
   
   setmetatable(assertion, {
     __index = function(t, k)
-      if table_has(paths[rawget(t, 'action')], k) then
+      if has(paths[rawget(t, 'action')], k) then
         rawset(t, 'action', k)
         return t
       end
