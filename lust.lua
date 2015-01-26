@@ -15,7 +15,7 @@ end
 function lust.test(name, fn)
   print(string.rep('\t', lust.level) .. name)
   lust.level = lust.level + 1
-  if type(lust.before) == 'function' then lust.before() end
+  if type(lust.onbefore) == 'function' then lust.onbefore(name) end
   local success, err = pcall(fn)
   if not success then
     print(string.rep('\t', lust.level) .. 'FAIL: ' .. err)
@@ -24,7 +24,17 @@ function lust.test(name, fn)
     print(string.rep('\t', lust.level) .. 'PASS')
   end
   lust.level = lust.level - 1
-  if type(lust.after) == 'function' then lust.after() end
+  if type(lust.onafter) == 'function' then lust.onafter(name) end
+end
+
+function lust.before(fn)
+  assert(fn == nil or type(fn) == 'function', 'Must pass nil or a function to lust.before')
+  lust.onbefore = fn
+end
+
+function lust.after(fn)
+  assert(fn == nil or type(fn) == 'function', 'Must pass nil or a function to lust.after')
+  lust.onafter = fn
 end
 
 -- Assertions
