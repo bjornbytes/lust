@@ -75,7 +75,12 @@ local paths = {
   truthy = {f = function(v) return v, tostring(v) .. ' is not truthy!' end},
   falsy = {f = function(v) return not v, tostring(v) .. ' is not falsy!' end},
   equal = {f = function(v, x) return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal!' end},
-  have = {f = function(v, x) return has(v, x), 'table "' .. tostring(v) .. '" does not have ' .. tostring(x) end}
+  have = {
+    f = function(v, x)
+      if type(v) ~= 'table' then return false, 'table "' .. tostring(v) .. '" is not a table!' end
+      return has(v, x), 'table "' .. tostring(v) .. '" does not have ' .. tostring(x)
+    end
+  }
 }
 
 function lust.expect(v)
