@@ -19,7 +19,6 @@ function lust.test(name, fn)
   local success, err = pcall(fn)
   if not success then
     print(string.rep('\t', lust.level) .. 'FAIL: ' .. err)
-    --error(name .. ' (' .. err .. ')', 0)
   else
     print(string.rep('\t', lust.level) .. 'PASS')
   end
@@ -87,7 +86,7 @@ function lust.expect(v)
   local assertion = {}
   assertion.val = v
   assertion.action = ''
-  
+
   setmetatable(assertion, {
     __index = function(t, k)
       if has(paths[rawget(t, 'action')], k) then
@@ -105,7 +104,7 @@ function lust.expect(v)
       end
     end
   })
-  
+
   return assertion
 end
 
