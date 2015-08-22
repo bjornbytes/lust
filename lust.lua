@@ -1,5 +1,5 @@
 -- lust - Lua test framework
--- https://github.com/bjornswenson/lust
+-- https://github.com/bjornbytes/lust
 -- License - MIT, see LICENSE for details.
 
 local lust = {}
