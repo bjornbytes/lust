@@ -19,18 +19,13 @@ function lust.describe(name, fn)
 end
 
 function lust.it(name, fn)
-  print(string.rep('\t', lust.level) .. name)
-  lust.level = lust.level + 1
   if type(lust.onbefore) == 'function' then lust.onbefore(name) end
   local success, err = pcall(fn)
-  if success then
-    lust.passes = lust.passes + 1
-    print(string.rep('\t', lust.level) .. green .. 'PASS' .. normal)
-  else
-    lust.errors = lust.errors + 1
-    print(string.rep('\t', lust.level) .. red .. 'FAIL' .. (err and (': ' .. err) or '') .. normal)
-  end
-  lust.level = lust.level - 1
+  if success then lust.passes = lust.passes + 1
+  else lust.errors = lust.errors + 1 end
+  local color = success and green or red
+  local label = success and 'PASS' or 'FAIL'
+  print(string.rep('\t', lust.level) .. color .. label .. normal .. ' ' .. name)
   if type(lust.onafter) == 'function' then lust.onafter(name) end
 end
 
