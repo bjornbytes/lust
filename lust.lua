@@ -4,6 +4,8 @@
 
 local lust = {}
 lust.level = 0
+lust.passes = 0
+lust.errors = 0
 
 local red = string.char(27) .. '[31m'
 local green = string.char(27) .. '[32m'
@@ -21,10 +23,12 @@ function lust.it(name, fn)
   lust.level = lust.level + 1
   if type(lust.onbefore) == 'function' then lust.onbefore(name) end
   local success, err = pcall(fn)
-  if not success then
-    print(string.rep('\t', lust.level) .. red .. 'FAIL' .. (err and (': ' .. err) or '') .. normal)
-  else
+  if success then
+    lust.passes = lust.passes + 1
     print(string.rep('\t', lust.level) .. green .. 'PASS' .. normal)
+  else
+    lust.errors = lust.errors + 1
+    print(string.rep('\t', lust.level) .. red .. 'FAIL' .. (err and (': ' .. err) or '') .. normal)
   end
   lust.level = lust.level - 1
   if type(lust.onafter) == 'function' then lust.onafter(name) end
