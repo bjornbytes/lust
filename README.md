@@ -13,12 +13,12 @@ local lust = require 'lust'
 
 lust.describe('my project', function()
   lust.describe('module1', function() -- Can be nested
-    lust.test('feature1', function()
+    lust.it('feature1', function()
       lust.expect(1).to.be.a('number') -- Pass
       lust.expect('astring').to.equal('astring') -- Pass
     end)
 
-    lust.test('feature2', function()
+    lust.it('feature2', function()
       lust.expect(nil).to.exist() -- Fail
     end)
   end)
@@ -32,7 +32,7 @@ Documentation
 
 Used to declare a group of tests.  `name` is a string used to describe the group, and `func` is a function containing all tests and `describe` blocks in the group.  Groups created using `describe` can be nested.
 
-`lust.test(name, func)`
+`lust.it(name, func)`
 
 Used to declare a test, which consists of a set of assertions.  `name` is a string used to describe the test, and `func` is a function containing the assertions.
 
@@ -66,7 +66,7 @@ Fails if `type(x)` is not equal to `type(y)`.
 
 ### Befores and Afters
 
-You can define functions that are called before and after every call to `lust.test`:
+You can define functions that are called before and after every call to `lust.it`:
 
 `lust.before(fn)`
 

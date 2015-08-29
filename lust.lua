@@ -12,7 +12,7 @@ function lust.describe(name, fn)
   lust.level = lust.level - 1
 end
 
-function lust.test(name, fn)
+function lust.it(name, fn)
   print(string.rep('\t', lust.level) .. name)
   lust.level = lust.level + 1
   if type(lust.onbefore) == 'function' then lust.onbefore(name) end
@@ -66,17 +66,17 @@ local paths = {
   [''] = {'to'},
   to = {'have', 'equal', 'be', 'exist'},
   be = {'a', 'an', 'truthy', 'falsy', f = function(v, x)
-    return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal!'
+    return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal'
   end},
   a = {f = isa},
   an = {f = isa},
-  exist = {f = function(v) return v == nil, tostring(v) .. ' is nil!' end},
-  truthy = {f = function(v) return v, tostring(v) .. ' is not truthy!' end},
-  falsy = {f = function(v) return not v, tostring(v) .. ' is not falsy!' end},
-  equal = {f = function(v, x) return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal!' end},
+  exist = {f = function(v) return v == nil, tostring(v) .. ' is nil' end},
+  truthy = {f = function(v) return v, tostring(v) .. ' is not truthy' end},
+  falsy = {f = function(v) return not v, tostring(v) .. ' is not falsy' end},
+  equal = {f = function(v, x) return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal' end},
   have = {
     f = function(v, x)
-      if type(v) ~= 'table' then return false, 'table "' .. tostring(v) .. '" is not a table!' end
+      if type(v) ~= 'table' then return false, 'table "' .. tostring(v) .. '" is not a table' end
       return has(v, x), 'table "' .. tostring(v) .. '" does not have ' .. tostring(x)
     end
   }
@@ -99,7 +99,7 @@ function lust.expect(v)
       if paths[t.action].f then
         local res, err = paths[t.action].f(t.val, ...)
         if not res then
-          error(err or 'unknown failure!', 2)
+          error(err or 'unknown failure', 2)
         end
       end
     end
@@ -107,5 +107,8 @@ function lust.expect(v)
 
   return assertion
 end
+
+lust.test = lust.it
+lust.paths = paths
 
 return lust
