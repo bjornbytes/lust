@@ -124,6 +124,21 @@ function lust.expect(v)
   return assertion
 end
 
+function lust.spy(subject, name, run)
+  local spy = {}
+  local original = subject[name]
+  subject[name] = function(...)
+    table.insert(spy, {...})
+    return original(...)
+  end
+
+  setmetatable(spy, {__call = function(_, fn) fn() return spy end})
+
+  if run then run() end
+
+  return spy
+end
+
 lust.test = lust.it
 lust.paths = paths
 

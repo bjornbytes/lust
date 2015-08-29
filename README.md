@@ -68,6 +68,42 @@ If `y` is a string, fails if `type(x)` is not equal to `y`.  If `y` is a table, 
 
 Negates the assertion.
 
+### Spies
+
+`lust.spy(table, key, run)`
+
+`lust.spy` spies on a function and tracks the number of times it was called and the arguments it was called with.  The first two arguments should be a table and the name of a function in the table. The third argument is an optional function that will be called after creating the spy. The return value is a table that will contain one element for each call to the function, and each element is a table containing the arguments passed to that invocation of the original function.  Example:
+
+```lua
+local object = {
+  method = function() end
+}
+
+-- Basic usage:
+local spy = lust.spy(object, 'method')
+object.method(3)
+lust.expect(#spy).to.equal(1)
+lust.expect(spy[1][1]).to.equal(3)
+
+-- Using a run function:
+local run = function()
+  object.method(1, 2, 3)
+  object.method(4, 5, 6)
+end
+
+lust.expect(lust.spy(object, 'method', run)).to.equal({{1, 2, 3}, {4, 5, 6}})
+
+-- You can also call the spy as a function:
+local spy = lust.spy(object, 'method')
+
+spy(function()
+  object.method('foo')
+end)
+
+lust.expect(#spy).to.equal(1)
+lust.expect(spy[1]).to.equal({'foo'})
+```
+
 ### Befores and Afters
 
 You can define functions that are called before and after every call to `lust.it`:
