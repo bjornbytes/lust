@@ -5,6 +5,10 @@
 local lust = {}
 lust.level = 0
 
+local red = string.char(27) .. '[31m'
+local green = string.char(27) .. '[32m'
+local normal = string.char(27) .. '[0m'
+
 function lust.describe(name, fn)
   print(string.rep('\t', lust.level) .. name)
   lust.level = lust.level + 1
@@ -18,9 +22,9 @@ function lust.it(name, fn)
   if type(lust.onbefore) == 'function' then lust.onbefore(name) end
   local success, err = pcall(fn)
   if not success then
-    print(string.rep('\t', lust.level) .. 'FAIL: ' .. err)
+    print(string.rep('\t', lust.level) .. red .. 'FAIL: ' .. err .. normal)
   else
-    print(string.rep('\t', lust.level) .. 'PASS')
+    print(string.rep('\t', lust.level) .. green .. 'PASS' .. normal)
   end
   lust.level = lust.level - 1
   if type(lust.onafter) == 'function' then lust.onafter(name) end
