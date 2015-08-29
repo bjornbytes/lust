@@ -74,8 +74,9 @@ local function strict_eq(t1, t2)
 end
 
 local paths = {
-  [''] = {'to'},
+  [''] = {'to', 'to_not'},
   to = {'have', 'equal', 'be', 'exist'},
+  to_not = {'have', 'equal', 'be', 'exist', chain = function(a) a.negate = not a.negate end},
   be = {'a', 'an', 'truthy', 'falsy', f = function(v, x)
     return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal'
   end},
@@ -97,11 +98,14 @@ function lust.expect(v)
   local assertion = {}
   assertion.val = v
   assertion.action = ''
+  assertion.negate = false
 
   setmetatable(assertion, {
     __index = function(t, k)
       if has(paths[rawget(t, 'action')], k) then
         rawset(t, 'action', k)
+        local chain = paths[rawget(t, 'action')].chain
+        if chain then chain(t) end
         return t
       end
       return rawget(t, k)
@@ -109,6 +113,7 @@ function lust.expect(v)
     __call = function(t, ...)
       if paths[t.action].f then
         local res, err = paths[t.action].f(t.val, ...)
+        if assertion.negate then res = not res end
         if not res then
           error(err or 'unknown failure', 2)
         end

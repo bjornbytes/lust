@@ -64,6 +64,10 @@ Truthy fails if `x` is `nil` or `false`.  Falsy fails if `x` is not `nil` or `fa
 
 If `y` is a string, fails if `type(x)` is not equal to `y`.  If `y` is a table, walks up `x`'s metatable chain and fails if `y` is not encountered.
 
+`lust.expect(x).to_not.*`
+
+Negates the assertion.
+
 ### Befores and Afters
 
 You can define functions that are called before and after every call to `lust.it`:
