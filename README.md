@@ -62,7 +62,7 @@ Truthy fails if `x` is `nil` or `false`.  Falsy fails if `x` is not `nil` or `fa
 
 `lust.expect(x).to.be.a(y)`
 
-Fails if `type(x)` is not equal to `type(y)`.
+If `y` is a string, fails if `type(x)` is not equal to `y`.  If `y` is a table, walks up `x`'s metatable chain and fails if `y` is not encountered.
 
 ### Befores and Afters
 

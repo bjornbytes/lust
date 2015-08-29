@@ -38,7 +38,18 @@ end
 
 -- Assertions
 local function isa(v, x)
-  if type(x) == 'string' then return type(v) == x, tostring(v) .. ' is not a ' .. x end
+  if type(x) == 'string' then return type(v) == x, tostring(v) .. ' is not a ' .. x
+  elseif type(x) == 'table' then
+    if type(v) ~= 'table' then return false, tostring(v) .. ' is not a ' .. tostring(x) end
+    local seen = {}
+    local meta = v
+    while meta and not seen[meta] do
+      if meta == x then return true end
+      seen[meta] = true
+      meta = getmetatable(meta) and getmetatable(meta).__index
+    end
+    return false, tostring(v) .. ' is not a ' .. tostring(x)
+  end
   return false, 'invalid type ' .. tostring(x)
 end
 
