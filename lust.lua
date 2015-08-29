@@ -22,7 +22,7 @@ function lust.it(name, fn)
   if type(lust.onbefore) == 'function' then lust.onbefore(name) end
   local success, err = pcall(fn)
   if not success then
-    print(string.rep('\t', lust.level) .. red .. 'FAIL: ' .. err .. normal)
+    print(string.rep('\t', lust.level) .. red .. 'FAIL' .. (err and (': ' .. err) or '') .. normal)
   else
     print(string.rep('\t', lust.level) .. green .. 'PASS' .. normal)
   end
