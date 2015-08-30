@@ -44,13 +44,9 @@ Lust uses "expect style" assertions.  An assertion begins with `lust.expect(valu
 
 Fails only if `x` is `nil`.
 
-`lust.expect(x).to.have(y)`
-
-If `x` is a table, ensures that at least one of its keys contains the value `y` using the `==` operator.  If `x` is not a table, this assertion fails.
-
 `lust.expect(x).to.equal(y)`
 
-Performs a strict equality test, failing if x and y have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.
+Performs a strict equality test, failing if `x` and `y` have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.
 
 `lust.expect(x).to.be(y)`
 
@@ -60,9 +56,13 @@ Performs an equality test using the `==` operator.  Fails if `x ~= y`.
 
 Truthy fails if `x` is `nil` or `false`.  Falsy fails if `x` is not `nil` or `false`.
 
-`lust.expect(x).to.be.a(y)`
+`lust.expect(x).to.be.a(y)`, `lust.expect(x).to.be.an(y)`
 
 If `y` is a string, fails if `type(x)` is not equal to `y`.  If `y` is a table, walks up `x`'s metatable chain and fails if `y` is not encountered.
+
+`lust.expect(x).to.have(y)`
+
+If `x` is a table, ensures that at least one of its keys contains the value `y` using the `==` operator.  If `x` is not a table, this assertion fails.
 
 `lust.expect(f).to.fail()`
 
@@ -76,7 +76,7 @@ Negates the assertion.
 
 `lust.spy(table, key, run)`
 
-`lust.spy` spies on a function and tracks the number of times it was called and the arguments it was called with.  The first two arguments should be a table and the name of a function in the table. The third argument is an optional function that will be called after creating the spy. The return value is a table that will contain one element for each call to the function, and each element is a table containing the arguments passed to that invocation of the original function.  Example:
+Spies on a function and tracks the number of times it was called and the arguments it was called with.  The first argument should be a table and the second argument should be a name of a function in the table. The third argument is an optional function that will be called after creating the spy. The return value is a table that will contain one element for each call to the function. Each element of this table is a table containing the arguments passed to that particular invocation of the function.  Example:
 
 ```lua
 local object = {
@@ -85,9 +85,10 @@ local object = {
 
 -- Basic usage:
 local spy = lust.spy(object, 'method')
-object.method(3)
-lust.expect(#spy).to.equal(1)
-lust.expect(spy[1][1]).to.equal(3)
+object.method(3, 4) -- spy is now {{3, 4}}
+object.method('foo') -- spy is now {{3, 4}, {'foo'}}
+lust.expect(#spy).to.equal(2)
+lust.expect(spy[1][2]).to.equal(4)
 
 -- Using a run function:
 local run = function()
@@ -119,10 +120,6 @@ Set a function that is called before every test, or `nil` to clear the function.
 `lust.after(fn)`
 
 Set a function that is called after every test, or `nil` to clear the function.  `fn` will be passed a single string containing the name of the test that was finished.
-
-### Output Options
-
-Coming soon.
 
 License
 ---
