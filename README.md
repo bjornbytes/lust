@@ -74,9 +74,15 @@ Negates the assertion.
 
 ### Spies
 
-##### `lust.spy(table, key, run)`
+##### `lust.spy(table, key, run)` and `lust.spy(function, run)`
 
-Spies on a function and tracks the number of times it was called and the arguments it was called with.  The first argument should be a table and the second argument should be a name of a function in the table. The third argument is an optional function that will be called after creating the spy. The return value is a table that will contain one element for each call to the function. Each element of this table is a table containing the arguments passed to that particular invocation of the function.  Example:
+Spies on a function and tracks the number of times it was called and the arguments it was called with.  There are 3 ways to specify arguments to this function:
+
+- Specify `nil`.
+- Specify a function.
+- Specify a table and a name of a function in that table.
+
+The return value is a table that will contain one element for each call to the function. Each element of this table is a table containing the arguments passed to that particular invocation of the function.  The table can also be called as a function, in which case it will call the function it is spying on.  The third argument, `run`, is a function that will be called immediately upon creation of the spy.  Example:
 
 ```lua
 local object = {
@@ -98,15 +104,18 @@ end
 
 lust.expect(lust.spy(object, 'method', run)).to.equal({{1, 2, 3}, {4, 5, 6}})
 
--- You can also call the spy as a function:
-local spy = lust.spy(object, 'method')
+-- Using a function input:
+local add = function(a, b)
+  return a + b
+end
 
-spy(function()
-  object.method('foo')
-end)
+local spy = lust.spy(fn)
 
-lust.expect(#spy).to.equal(1)
-lust.expect(spy[1]).to.equal({'foo'})
+spy(1, 2) -- => {{1, 2}}
+spy('rain', 'bows') -- => {{1, 2}, {'rain', 'bows'}}
+
+lust.expect(#spy).to.equal(2)
+lust.expect(spy[2]).to.equal({'rain', 'bows'})
 ```
 
 ### Befores and Afters
