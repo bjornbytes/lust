@@ -109,7 +109,7 @@ local add = function(a, b)
   return a + b
 end
 
-local spy = lust.spy(fn)
+local spy = lust.spy(add)
 
 spy(1, 2) -- => {{1, 2}}
 spy('rain', 'bows') -- => {{1, 2}, {'rain', 'bows'}}
