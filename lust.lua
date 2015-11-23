@@ -6,6 +6,8 @@ local lust = {}
 lust.level = 0
 lust.passes = 0
 lust.errors = 0
+lust.befores = {}
+lust.afters = {}
 
 local red = string.char(27) .. '[31m'
 local green = string.char(27) .. '[32m'
@@ -16,11 +18,20 @@ function lust.describe(name, fn)
   print(indent() .. name)
   lust.level = lust.level + 1
   fn()
+  lust.befores[lust.level] = {}
+  lust.afters[lust.level] = {}
   lust.level = lust.level - 1
 end
 
 function lust.it(name, fn)
-  if type(lust.onbefore) == 'function' then lust.onbefore(name) end
+  for level = 1, lust.level do
+    if lust.befores[level] then
+      for i = 1, #lust.befores[level] do
+        lust.befores[level][i](name)
+      end
+    end
+  end
+
   local success, err = pcall(fn)
   if success then lust.passes = lust.passes + 1
   else lust.errors = lust.errors + 1 end
@@ -30,17 +41,24 @@ function lust.it(name, fn)
   if err then
     print(indent(lust.level + 1) .. red .. err .. normal)
   end
-  if type(lust.onafter) == 'function' then lust.onafter(name) end
+
+  for level = 1, lust.level do
+    if lust.afters[level] then
+      for i = 1, #lust.afters[level] do
+        lust.afters[level][i](name)
+      end
+    end
+  end
 end
 
 function lust.before(fn)
-  assert(fn == nil or type(fn) == 'function', 'Must pass nil or a function to lust.before')
-  lust.onbefore = fn
+  lust.befores[lust.level] = lust.befores[lust.level] or {}
+  table.insert(lust.befores[lust.level], fn)
 end
 
 function lust.after(fn)
-  assert(fn == nil or type(fn) == 'function', 'Must pass nil or a function to lust.after')
-  lust.onafter = fn
+  lust.afters[lust.level] = lust.afters[lust.level] or {}
+  table.insert(lust.afters[lust.level], fn)
 end
 
 -- Assertions

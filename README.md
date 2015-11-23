@@ -12,6 +12,10 @@ Copy the `lust.lua` file to a project directory and require it, which returns a 
 local lust = require 'lust'
 
 lust.describe('my project', function()
+  lust.before(function()
+    -- This gets run before every test.
+  end)
+
   lust.describe('module1', function() -- Can be nested
     lust.it('feature1', function()
       lust.expect(1).to.be.a('number') -- Pass
@@ -120,15 +124,15 @@ lust.expect(spy[2]).to.equal({'rain', 'bows'})
 
 ### Befores and Afters
 
-You can define functions that are called before and after every call to `lust.it`:
+You can define functions that are called before and after every call to `lust.it` using `lust.before` and `lust.after`.  They are scoped to the `describe` block that contains them as well as any inner `describe` blocks.
 
 ##### `lust.before(fn)`
 
-Set a function that is called before every test, or `nil` to clear the function.  `fn` will be passed a single string containing the name of the test about to be run.
+Set a function that is called before every test inside this `describe` block.  `fn` will be passed a single string containing the name of the test about to be run.
 
 ##### `lust.after(fn)`
 
-Set a function that is called after every test, or `nil` to clear the function.  `fn` will be passed a single string containing the name of the test that was finished.
+Set a function that is called after every test inside this `describe` block.  `fn` will be passed a single string containing the name of the test that was finished.
 
 License
 ---
