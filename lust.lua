@@ -63,9 +63,17 @@ end
 
 -- Assertions
 local function isa(v, x)
-  if type(x) == 'string' then return type(v) == x, tostring(v) .. ' is not a ' .. x
+  if type(x) == 'string' then
+    return type(v) == x,
+      'expected ' .. tostring(v) .. ' to be a ' .. x,
+      'expected ' .. tostring(v) .. ' to not be a ' .. x
   elseif type(x) == 'table' then
-    if type(v) ~= 'table' then return false, tostring(v) .. ' is not a ' .. tostring(x) end
+    if type(v) ~= 'table' then
+      return false,
+        'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
+        'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
+    end
+
     local seen = {}
     local meta = v
     while meta and not seen[meta] do
@@ -73,9 +81,13 @@ local function isa(v, x)
       seen[meta] = true
       meta = getmetatable(meta) and getmetatable(meta).__index
     end
-    return false, tostring(v) .. ' is not a ' .. tostring(x)
+
+    return false,
+      'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
+      'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
   end
-  return false, 'invalid type ' .. tostring(x)
+
+  error('invalid type ' .. tostring(x))
 end
 
 local function has(t, x)
@@ -99,25 +111,57 @@ local function strict_eq(t1, t2)
 end
 
 local paths = {
-  [''] = {'to', 'to_not'},
-  to = {'have', 'equal', 'be', 'exist', 'fail'},
-  to_not = {'have', 'equal', 'be', 'exist', 'fail', chain = function(a) a.negate = not a.negate end},
-  be = {'a', 'an', 'truthy', 'falsy', f = function(v, x)
-    return v == x, tostring(v) .. ' and ' .. tostring(x) .. ' are not equal'
-  end},
-  a = {f = isa},
-  an = {f = isa},
-  exist = {f = function(v) return v ~= nil, tostring(v) .. ' is nil' end},
-  truthy = {f = function(v) return v, tostring(v) .. ' is not truthy' end},
-  falsy = {f = function(v) return not v, tostring(v) .. ' is not falsy' end},
-  equal = {f = function(v, x) return strict_eq(v, x), tostring(v) .. ' and ' .. tostring(x) .. ' are not strictly equal' end},
-  have = {
+  [''] = { 'to', 'to_not' },
+  to = { 'have', 'equal', 'be', 'exist', 'fail' },
+  to_not = { 'have', 'equal', 'be', 'exist', 'fail', chain = function(a) a.negate = not a.negate end },
+  a = { f = isa },
+  an = { f = isa },
+  be = { 'a', 'an', 'truthy',
     f = function(v, x)
-      if type(v) ~= 'table' then return false, 'table "' .. tostring(v) .. '" is not a table' end
-      return has(v, x), 'table "' .. tostring(v) .. '" does not have ' .. tostring(x)
+      return v == x,
+        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal',
+        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
     end
   },
-  fail = {f = function(v) return not pcall(v), tostring(v) .. ' did not fail' end}
+  exist = {
+    f = function(v)
+      return v ~= nil,
+        'expected ' .. tostring(v) .. ' to exist',
+        'expected ' .. tostring(v) .. ' to not exist'
+    end
+  },
+  truthy = {
+    f = function(v)
+      return v,
+        'expected ' .. tostring(v) .. ' to be truthy',
+        'expected ' .. tostring(v) .. ' to not be truthy'
+    end
+  },
+  equal = {
+    f = function(v, x)
+      return strict_eq(v, x),
+        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be exactly equal',
+        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be exactly equal'
+    end
+  },
+  have = {
+    f = function(v, x)
+      if type(v) ~= 'table' then
+        error('expected ' .. tostring(v) .. ' to be a table')
+      end
+
+      return has(v, x),
+        'expected ' .. tostring(v) .. ' to contain ' .. tostring(x),
+        'expected ' .. tostring(v) .. ' to not contain ' .. tostring(x)
+    end
+  },
+  fail = {
+    f = function(v)
+      return not pcall(v),
+        'expected ' .. tostring(v) .. ' to fail',
+        'expected ' .. tostring(v) .. ' to not fail'
+    end
+  }
 }
 
 function lust.expect(v)
@@ -138,8 +182,11 @@ function lust.expect(v)
     end,
     __call = function(t, ...)
       if paths[t.action].f then
-        local res, err = paths[t.action].f(t.val, ...)
-        if assertion.negate then res = not res end
+        local res, err, nerr = paths[t.action].f(t.val, ...)
+        if assertion.negate then
+          res = not res
+          err = nerr or err
+        end
         if not res then
           error(err or 'unknown failure', 2)
         end
