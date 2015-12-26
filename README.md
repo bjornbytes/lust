@@ -142,7 +142,7 @@ Example of adding a custom `empty` assertion:
 local lust = require 'lust'
 
 lust.paths.empty = {
-  f = function(value)
+  test = function(value)
     return #value == 0,
       'expected ' .. tostring(value) .. ' to be empty',
       'expected ' .. tostring(value) .. ' to not be empty'
