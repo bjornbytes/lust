@@ -1,6 +1,6 @@
--- lust - Lua test framework
+-- lust v0.1.0 - Lua test framework
 -- https://github.com/bjornbytes/lust
--- License - MIT, see LICENSE for details.
+-- MIT LICENSE
 
 local lust = {}
 lust.level = 0
@@ -114,38 +114,38 @@ local paths = {
   [''] = { 'to', 'to_not' },
   to = { 'have', 'equal', 'be', 'exist', 'fail' },
   to_not = { 'have', 'equal', 'be', 'exist', 'fail', chain = function(a) a.negate = not a.negate end },
-  a = { f = isa },
-  an = { f = isa },
+  a = { test = isa },
+  an = { test = isa },
   be = { 'a', 'an', 'truthy',
-    f = function(v, x)
+    test = function(v, x)
       return v == x,
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal',
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
     end
   },
   exist = {
-    f = function(v)
+    test = function(v)
       return v ~= nil,
         'expected ' .. tostring(v) .. ' to exist',
         'expected ' .. tostring(v) .. ' to not exist'
     end
   },
   truthy = {
-    f = function(v)
+    test = function(v)
       return v,
         'expected ' .. tostring(v) .. ' to be truthy',
         'expected ' .. tostring(v) .. ' to not be truthy'
     end
   },
   equal = {
-    f = function(v, x)
+    test = function(v, x)
       return strict_eq(v, x),
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be exactly equal',
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be exactly equal'
     end
   },
   have = {
-    f = function(v, x)
+    test = function(v, x)
       if type(v) ~= 'table' then
         error('expected ' .. tostring(v) .. ' to be a table')
       end
@@ -156,7 +156,7 @@ local paths = {
     end
   },
   fail = {
-    f = function(v)
+    test = function(v)
       return not pcall(v),
         'expected ' .. tostring(v) .. ' to fail',
         'expected ' .. tostring(v) .. ' to not fail'

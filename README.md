@@ -56,9 +56,9 @@ Performs a strict equality test, failing if `x` and `y` have different types or 
 
 Performs an equality test using the `==` operator.  Fails if `x ~= y`.
 
-##### `lust.expect(x).to.be.truthy()` and `lust.expect(x).to.be.falsy()`
+##### `lust.expect(x).to.be.truthy()`
 
-Truthy fails if `x` is `nil` or `false`.  Falsy fails if `x` is not `nil` or `false`.
+Fails if `x` is `nil` or `false`.
 
 ##### `lust.expect(x).to.be.a(y)`
 
@@ -133,6 +133,35 @@ Set a function that is called before every test inside this `describe` block.  `
 ##### `lust.after(fn)`
 
 Set a function that is called after every test inside this `describe` block.  `fn` will be passed a single string containing the name of the test that was finished.
+
+### Custom Assertions
+
+Example of adding a custom `empty` assertion:
+
+```lua
+local lust = require 'lust'
+
+lust.paths.empty = {
+  f = function(value)
+    return #value == 0,
+      'expected ' .. tostring(value) .. ' to be empty',
+      'expected ' .. tostring(value) .. ' to not be empty'
+  end
+}
+
+table.insert(lust.paths.be, 'empty')
+
+lust.expect({}).to.be.empty()
+lust.expect('').to.be.empty()
+```
+
+First we define the assertion in the `lust.paths` table.  Each path is a table containing a `test`
+function which performs the assertion.  It returns three values: the result of the test (true for
+pass, false for fail), followed by two messages: the first for a normal expectation failure, the
+second for when the expectation is negated.
+
+We then insert our 'empty' assertion into the `be` path -- the numeric keys of a path represent the
+possible expectations that can be chained.
 
 License
 ---
