@@ -10,20 +10,21 @@ Copy the `lust.lua` file to a project directory and require it, which returns a 
 
 ```Lua
 local lust = require 'lust'
+local describe, it, expect = lust.describe, lust.it, lust.expect
 
-lust.describe('my project', function()
+describe('my project', function()
   lust.before(function()
     -- This gets run before every test.
   end)
 
-  lust.describe('module1', function() -- Can be nested
-    lust.it('feature1', function()
-      lust.expect(1).to.be.a('number') -- Pass
-      lust.expect('astring').to.equal('astring') -- Pass
+  describe('module1', function() -- Can be nested
+    it('feature1', function()
+      expect(1).to.be.a('number') -- Pass
+      expect('astring').to.equal('astring') -- Pass
     end)
 
-    lust.it('feature2', function()
-      lust.expect(nil).to.exist() -- Fail
+    it('feature2', function()
+      expect(nil).to.exist() -- Fail
     end)
   end)
 end)
