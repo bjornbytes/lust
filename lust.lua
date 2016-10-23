@@ -181,8 +181,8 @@ function lust.expect(v)
       return rawget(t, k)
     end,
     __call = function(t, ...)
-      if paths[t.action].f then
-        local res, err, nerr = paths[t.action].f(t.val, ...)
+      if paths[t.action].test then
+        local res, err, nerr = paths[t.action].test(t.val, ...)
         if assertion.negate then
           res = not res
           err = nerr or err
