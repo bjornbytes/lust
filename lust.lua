@@ -97,16 +97,9 @@ local function has(t, x)
   return false
 end
 
-local function tableSize(t)
-  local i = 0
-  for k in pairs(t) do i = i + 1 end
-  return i
-end
-
 local function strict_eq(t1, t2)
   if type(t1) ~= type(t2) then return false end
   if type(t1) ~= 'table' then return t1 == t2 end
-  if tableSize(t1) ~= tableSize(t2) then return false end
   for k, _ in pairs(t1) do
     if not strict_eq(t1[k], t2[k]) then return false end
   end
