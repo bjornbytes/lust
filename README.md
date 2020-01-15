@@ -1,7 +1,11 @@
 Lust
 ===
 
-Lust is a small library that tests Lua code.
+Lust is a small library that tests Lua code.  It's useful because it is a single file and isn't very
+opinionated, which can make it easier to quickly add testing to a Lua project.
+
+It supports nested describe/it blocks, before/after handlers, expect-style assertions, function
+spies, and colors.
 
 Usage
 ---
