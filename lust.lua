@@ -14,6 +14,11 @@ local green = string.char(27) .. '[32m'
 local normal = string.char(27) .. '[0m'
 local function indent(level) return string.rep('\t', level or lust.level) end
 
+function lust.nocolor()
+  red, green, normal = '', '', ''
+  return lust
+end
+
 function lust.describe(name, fn)
   print(indent() .. name)
   lust.level = lust.level + 1
