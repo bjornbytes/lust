@@ -168,7 +168,7 @@ second for when the expectation is negated.
 We then insert our 'empty' assertion into the `be` path -- the numeric keys of a path represent the
 possible expectations that can be chained.
 
-### Non-console environments
+### Non-console Environments
 
 If Lua is embedded in an application and does not run in a console environment that understands ANSI color escapes, the library can be required as follows:
 
