@@ -116,8 +116,8 @@ end
 
 local paths = {
   [''] = { 'to', 'to_not' },
-  to = { 'have', 'equal', 'be', 'exist', 'fail' },
-  to_not = { 'have', 'equal', 'be', 'exist', 'fail', chain = function(a) a.negate = not a.negate end },
+  to = { 'have', 'equal', 'be', 'exist', 'fail', 'match' },
+  to_not = { 'have', 'equal', 'be', 'exist', 'fail', 'match', chain = function(a) a.negate = not a.negate end },
   a = { test = isa },
   an = { test = isa },
   be = { 'a', 'an', 'truthy',
@@ -165,7 +165,16 @@ local paths = {
         'expected ' .. tostring(v) .. ' to fail',
         'expected ' .. tostring(v) .. ' to not fail'
     end
-  }
+  },
+  match = {
+    test = function(v, p)
+      if type(v) ~= 'string' then v = tostring(v) end
+      local result = string.find(v, p)
+      return result ~= nil,
+        'expected ' .. v .. ' to match pattern [[' .. p .. ']]',
+        'expected ' .. v .. ' to not match pattern [[' .. p .. ']]'
+    end
+  },
 }
 
 function lust.expect(v)
