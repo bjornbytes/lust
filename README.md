@@ -77,6 +77,10 @@ If `x` is a table, ensures that at least one of its keys contains the value `y` 
 
 Ensures that the function `f` causes an error when it is run.
 
+##### `lust.expect(x).to.match(p)`
+
+Fails if the string representation of `x` does not match the pattern `p`.
+
 ##### `lust.expect(x).to_not.*`
 
 Negates the assertion.
