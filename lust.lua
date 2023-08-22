@@ -1,4 +1,4 @@
--- lust v0.1.0 - Lua test framework
+-- lust v0.2.0 - Lua test framework
 -- https://github.com/bjornbytes/lust
 -- MIT LICENSE
 
