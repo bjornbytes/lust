@@ -160,13 +160,14 @@ local paths = {
   equal = {
     test = function(v, x, eps)
       local comparison = ''
+      local equal = eq(v, x, eps)
 
-      if type(v) == 'table' or type(x) == 'table' then
+      if not equal and (type(v) == 'table' or type(x) == 'table') then
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'LHS: ' .. stringify(v)
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'RHS: ' .. stringify(x)
       end
 
-      return eq(v, x, eps),
+      return equal,
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison,
         'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
     end
