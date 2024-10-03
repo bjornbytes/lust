@@ -53,9 +53,9 @@ Lust uses "expect style" assertions.  An assertion begins with `lust.expect(valu
 
 Fails only if `x` is `nil`.
 
-##### `lust.expect(x).to.equal(y)`
+##### `lust.expect(x).to.equal(y, [eps])`
 
-Performs a strict equality test, failing if `x` and `y` have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.
+Performs a strict equality test, failing if `x` and `y` have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.  The optional `eps` parameter is used as a threshold for numbers to test for approximate floating point equality.
 
 ##### `lust.expect(x).to.be(y)`
 
@@ -75,7 +75,11 @@ If `x` is a table, ensures that at least one of its keys contains the value `y` 
 
 ##### `lust.expect(f).to.fail()`
 
-Ensures that the function `f` causes an error when it is run.
+Ensures that the function `f` throws an error when it is run.
+
+##### `lust.expect(f).to.fail.with(pattern)`
+
+Ensures that the function `f` throws an error matching `pattern` when it is run.
 
 ##### `lust.expect(x).to.match(p)`
 
