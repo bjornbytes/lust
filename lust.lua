@@ -2,6 +2,13 @@
 -- https://github.com/bjornbytes/lust
 -- MIT LICENSE
 
+if LustResults ~= nil then
+  LustResults = {
+    Errors = 0,
+    Passes = 0
+  }
+end
+
 local lust = {}
 lust.level = 0
 lust.passes = 0
@@ -38,8 +45,13 @@ function lust.it(name, fn)
   end
 
   local success, err = pcall(fn)
-  if success then lust.passes = lust.passes + 1
-  else lust.errors = lust.errors + 1 end
+  if success then
+    lust.passes = lust.passes + 1
+    LustResults.Passes = LustResults.Passes + 1
+  else
+    lust.errors = lust.errors + 1
+    LustResults.Errors = LustResults.Errors + 1
+  end
   local color = success and green or red
   local label = success and 'PASS' or 'FAIL'
   print(indent() .. color .. label .. normal .. ' ' .. name)
@@ -70,13 +82,13 @@ end
 local function isa(v, x)
   if type(x) == 'string' then
     return type(v) == x,
-      'expected ' .. tostring(v) .. ' to be a ' .. x,
-      'expected ' .. tostring(v) .. ' to not be a ' .. x
+        'expected ' .. tostring(v) .. ' to be a ' .. x,
+        'expected ' .. tostring(v) .. ' to not be a ' .. x
   elseif type(x) == 'table' then
     if type(v) ~= 'table' then
       return false,
-        'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
-        'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
+          'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
+          'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
     end
 
     local seen = {}
@@ -88,8 +100,8 @@ local function isa(v, x)
     end
 
     return false,
-      'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
-      'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
+        'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
+        'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
   end
 
   error('invalid type ' .. tostring(x))
@@ -136,25 +148,28 @@ local paths = {
   to_not = { 'have', 'equal', 'be', 'exist', 'fail', 'match', chain = function(a) a.negate = not a.negate end },
   a = { test = isa },
   an = { test = isa },
-  be = { 'a', 'an', 'truthy',
+  be = {
+    'a',
+    'an',
+    'truthy',
     test = function(v, x)
       return v == x,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same',
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be the same'
+          'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same',
+          'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be the same'
     end
   },
   exist = {
     test = function(v)
       return v ~= nil,
-        'expected ' .. tostring(v) .. ' to exist',
-        'expected ' .. tostring(v) .. ' to not exist'
+          'expected ' .. tostring(v) .. ' to exist',
+          'expected ' .. tostring(v) .. ' to not exist'
     end
   },
   truthy = {
     test = function(v)
       return v,
-        'expected ' .. tostring(v) .. ' to be truthy',
-        'expected ' .. tostring(v) .. ' to not be truthy'
+          'expected ' .. tostring(v) .. ' to be truthy',
+          'expected ' .. tostring(v) .. ' to not be truthy'
     end
   },
   equal = {
@@ -168,8 +183,8 @@ local paths = {
       end
 
       return equal,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
+          'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison,
+          'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
     end
   },
   have = {
@@ -179,23 +194,24 @@ local paths = {
       end
 
       return has(v, x),
-        'expected ' .. tostring(v) .. ' to contain ' .. tostring(x),
-        'expected ' .. tostring(v) .. ' to not contain ' .. tostring(x)
+          'expected ' .. tostring(v) .. ' to contain ' .. tostring(x),
+          'expected ' .. tostring(v) .. ' to not contain ' .. tostring(x)
     end
   },
-  fail = { 'with',
+  fail = {
+    'with',
     test = function(v)
       return not pcall(v),
-        'expected ' .. tostring(v) .. ' to fail',
-        'expected ' .. tostring(v) .. ' to not fail'
+          'expected ' .. tostring(v) .. ' to fail',
+          'expected ' .. tostring(v) .. ' to not fail'
     end
   },
   with = {
     test = function(v, pattern)
       local ok, message = pcall(v)
       return not ok and message:match(pattern),
-        'expected ' .. tostring(v) .. ' to fail with error matching "' .. pattern .. '"',
-        'expected ' .. tostring(v) .. ' to not fail with error matching "' .. pattern .. '"'
+          'expected ' .. tostring(v) .. ' to fail with error matching "' .. pattern .. '"',
+          'expected ' .. tostring(v) .. ' to not fail with error matching "' .. pattern .. '"'
     end
   },
   match = {
@@ -203,8 +219,8 @@ local paths = {
       if type(v) ~= 'string' then v = tostring(v) end
       local result = string.find(v, p)
       return result ~= nil,
-        'expected ' .. v .. ' to match pattern [[' .. p .. ']]',
-        'expected ' .. v .. ' to not match pattern [[' .. p .. ']]'
+          'expected ' .. v .. ' to match pattern [[' .. p .. ']]',
+          'expected ' .. v .. ' to not match pattern [[' .. p .. ']]'
     end
   }
 }
@@ -247,7 +263,7 @@ function lust.spy(target, name, run)
   local subject
 
   local function capture(...)
-    table.insert(spy, {...})
+    table.insert(spy, { ... })
     return subject(...)
   end
 
@@ -259,7 +275,7 @@ function lust.spy(target, name, run)
     subject = target or function() end
   end
 
-  setmetatable(spy, {__call = function(_, ...) return capture(...) end})
+  setmetatable(spy, { __call = function(_, ...) return capture(...) end })
 
   if run then run() end
 
