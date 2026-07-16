@@ -130,7 +130,7 @@ local paths = {
   to_not = { 'have', 'equal', 'be', 'exist', 'fail', 'match', chain = function(a) a.negate = not a.negate end },
   a = { test = isa },
   an = { test = isa },
-  be = { 'a', 'an', 'truthy',
+  be = { 'a', 'an', 'truthy', 'falsy',
     test = function(v, x)
       return v == x, 'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same'
     end
@@ -143,6 +143,11 @@ local paths = {
   truthy = {
     test = function(v)
       return v, 'expected ' .. tostring(v) .. ' to be truthy'
+    end
+  },
+  falsy = {
+    test = function(v)
+      return not v, 'expected ' .. tostring(v) .. ' to be falsy'
     end
   },
   equal = {
