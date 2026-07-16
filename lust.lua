@@ -69,14 +69,10 @@ end
 -- Assertions
 local function isa(v, x)
   if type(x) == 'string' then
-    return type(v) == x,
-      'expected ' .. tostring(v) .. ' to be a ' .. x,
-      'expected ' .. tostring(v) .. ' to not be a ' .. x
+    return type(v) == x, 'expected ' .. tostring(v) .. ' to be a ' .. x
   elseif type(x) == 'table' then
     if type(v) ~= 'table' then
-      return false,
-        'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
-        'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
+      return false, 'expected ' .. tostring(v) .. ' to be a ' .. tostring(x)
     end
 
     local seen = {}
@@ -87,9 +83,7 @@ local function isa(v, x)
       meta = getmetatable(meta) and getmetatable(meta).__index
     end
 
-    return false,
-      'expected ' .. tostring(v) .. ' to be a ' .. tostring(x),
-      'expected ' .. tostring(v) .. ' to not be a ' .. tostring(x)
+    return false, 'expected ' .. tostring(v) .. ' to be a ' .. tostring(x)
   end
 
   error('invalid type ' .. tostring(x))
@@ -138,23 +132,17 @@ local paths = {
   an = { test = isa },
   be = { 'a', 'an', 'truthy',
     test = function(v, x)
-      return v == x,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same',
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be the same'
+      return v == x, 'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same'
     end
   },
   exist = {
     test = function(v)
-      return v ~= nil,
-        'expected ' .. tostring(v) .. ' to exist',
-        'expected ' .. tostring(v) .. ' to not exist'
+      return v ~= nil, 'expected ' .. tostring(v) .. ' to exist'
     end
   },
   truthy = {
     test = function(v)
-      return v,
-        'expected ' .. tostring(v) .. ' to be truthy',
-        'expected ' .. tostring(v) .. ' to not be truthy'
+      return v, 'expected ' .. tostring(v) .. ' to be truthy'
     end
   },
   equal = {
@@ -162,14 +150,12 @@ local paths = {
       local comparison = ''
       local equal = eq(v, x, eps)
 
-      if not equal and (type(v) == 'table' or type(x) == 'table') then
+      if (type(v) == 'table' or type(x) == 'table') then
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'LHS: ' .. stringify(v)
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'RHS: ' .. stringify(x)
       end
 
-      return equal,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison,
-        'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to not be equal'
+      return equal, 'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison
     end
   },
   have = {
@@ -178,33 +164,25 @@ local paths = {
         error('expected ' .. tostring(v) .. ' to be a table')
       end
 
-      return has(v, x),
-        'expected ' .. tostring(v) .. ' to contain ' .. tostring(x),
-        'expected ' .. tostring(v) .. ' to not contain ' .. tostring(x)
+      return has(v, x), 'expected ' .. tostring(v) .. ' to contain ' .. tostring(x)
     end
   },
   fail = { 'with',
     test = function(v)
-      return not pcall(v),
-        'expected ' .. tostring(v) .. ' to fail',
-        'expected ' .. tostring(v) .. ' to not fail'
+      return not pcall(v), 'expected ' .. tostring(v) .. ' to fail'
     end
   },
   with = {
     test = function(v, pattern)
       local ok, message = pcall(v)
-      return not ok and message:match(pattern),
-        'expected ' .. tostring(v) .. ' to fail with error matching "' .. pattern .. '"',
-        'expected ' .. tostring(v) .. ' to not fail with error matching "' .. pattern .. '"'
+      return not ok and message:match(pattern), 'expected ' .. tostring(v) .. ' to fail with error matching "' .. pattern .. '"'
     end
   },
   match = {
     test = function(v, p)
       if type(v) ~= 'string' then v = tostring(v) end
       local result = string.find(v, p)
-      return result ~= nil,
-        'expected ' .. v .. ' to match pattern [[' .. p .. ']]',
-        'expected ' .. v .. ' to not match pattern [[' .. p .. ']]'
+      return result ~= nil, 'expected ' .. v .. ' to match pattern [[' .. p .. ']]'
     end
   }
 }
@@ -227,10 +205,10 @@ function lust.expect(v)
     end,
     __call = function(t, ...)
       if paths[t.action].test then
-        local res, err, nerr = paths[t.action].test(t.val, ...)
+        local res, err = paths[t.action].test(t.val, ...)
         if assertion.negate then
           res = not res
-          err = nerr or err
+          err = err:gsub(' to ', ' to not ', 1)
         end
         if not res then
           error(err or 'unknown failure', 2)
