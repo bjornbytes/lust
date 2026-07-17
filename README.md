@@ -47,23 +47,40 @@ Used to declare a test, which consists of a set of assertions.  `name` is a stri
 
 ### Assertions
 
-Lust uses "expect style" assertions.  An assertion begins with `lust.expect(value)` and other modifiers can be chained after that:
+Cheatsheet
 
-##### `lust.expect(x).to.exist()`
+```lua
+expect(...).to.exist()
+expect(...).to.be.truthy()
+expect(...).to.be.falsy()
+expect(...).to.be(...)
+expect(...).to.equal(...)
+expect(...).to.approximately.equal(...)
+expect(...).to.approximately(eps).equal(...)
+expect(t).to.have(val)
+expect(f).to.fail(pattern?)
+expect(x).to_not.*
+```
 
-Fails only if `x` is `nil`.
+Lust uses "expect style" assertions.  An assertion begins with `lust.expect(value)` and other modifiers can be chained after that.  Some assertions support multiple arguments, denoted by `...`.
 
-##### `lust.expect(x).to.equal(y, [eps])`
+##### `lust.expect(...).to.exist()`
 
-Performs a strict equality test, failing if `x` and `y` have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.  The optional `eps` parameter is used as a threshold for numbers to test for approximate floating point equality.
+Fails only if any of its arguments are `nil`.
 
-##### `lust.expect(x).to.be(y)`
+##### `lust.expect(...).to.equal(...)`
 
-Performs an equality test using the `==` operator.  Fails if `x ~= y`.
+Performs a strict equality test, failing if the two sets of arguments have different types or values.  Tables are tested by recursively ensuring that both tables contain the same set of keys and values.  Metatables are not taken into consideration.
 
-##### `lust.expect(x).to.be.truthy()`
+This test works with the `approximately` modifier, to test for approximate floating point equality.
 
-Fails if `x` is `nil` or `false`.
+##### `lust.expect(...).to.be(...)`
+
+Performs a simple equality test using the `==` operator.
+
+##### `lust.expect(...).to.be.truthy()`
+
+Fails if any of the arguments are `nil` or `false`.
 
 ##### `lust.expect(x).to.be.a(y)`
 
@@ -73,13 +90,10 @@ If `y` is a string, fails if `type(x)` is not equal to `y`.  If `y` is a table, 
 
 If `x` is a table, ensures that at least one of its keys contains the value `y` using the `==` operator.  If `x` is not a table, this assertion fails.
 
-##### `lust.expect(f).to.fail()`
+##### `lust.expect(f, ...).to.fail([pattern])`
 
-Ensures that the function `f` throws an error when it is run.
-
-##### `lust.expect(f).to.fail.with(pattern)`
-
-Ensures that the function `f` throws an error matching `pattern` when it is run.
+Ensures that the function `f` throws an error when it is called with arguments `...`.  An optional
+pattern can be used to assert that the error message matches a pattern.
 
 ##### `lust.expect(x).to.match(p)`
 
@@ -156,9 +170,7 @@ local lust = require 'lust'
 
 lust.paths.empty = {
   test = function(value)
-    return #value == 0,
-      'expected ' .. tostring(value) .. ' to be empty',
-      'expected ' .. tostring(value) .. ' to not be empty'
+    return #value == 0, 'expected ' .. tostring(value) .. ' to be empty'
   end
 }
 
@@ -169,9 +181,8 @@ lust.expect('').to.be.empty()
 ```
 
 First we define the assertion in the `lust.paths` table.  Each path is a table containing a `test`
-function which performs the assertion.  It returns three values: the result of the test (true for
-pass, false for fail), followed by two messages: the first for a normal expectation failure, the
-second for when the expectation is negated.
+function which performs the assertion.  It returns two values: the result of the test (true for
+pass, false for fail), followed by a failure message.
 
 We then insert our 'empty' assertion into the `be` path -- the numeric keys of a path represent the
 possible expectations that can be chained.
