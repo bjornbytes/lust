@@ -176,8 +176,14 @@ local paths = {
     end
   },
   fail = { 'with',
-    test = function(v)
-      return not pcall(v[1]), 'expected ' .. tostring(v[1]) .. ' to fail'
+    test = function(v, pattern)
+      local ok, err = pcall(v[1])
+
+      if pattern then
+        return not ok and string.find(err, pattern), 'expected ' .. tostring(v[1]) .. ' to fail with error matching "' .. pattern .. '"'
+      else
+        return not ok, 'expected ' .. tostring(v[1]) .. ' to fail'
+      end
     end
   },
   with = {
