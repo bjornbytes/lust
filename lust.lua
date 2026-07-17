@@ -69,21 +69,21 @@ end
 -- Assertions
 local function isa(v, x)
   if type(x) == 'string' then
-    return type(v) == x, 'expected ' .. tostring(v) .. ' to be a ' .. x
+    return type(v[1]) == x, 'expected ' .. tostring(v[1]) .. ' to be a ' .. x
   elseif type(x) == 'table' then
-    if type(v) ~= 'table' then
-      return false, 'expected ' .. tostring(v) .. ' to be a ' .. tostring(x)
+    if type(v[1]) ~= 'table' then
+      return false, 'expected ' .. tostring(v[1]) .. ' to be a ' .. tostring(x)
     end
 
     local seen = {}
-    local meta = v
+    local meta = v[1]
     while meta and not seen[meta] do
       if meta == x then return true end
       seen[meta] = true
       meta = getmetatable(meta) and getmetatable(meta).__index
     end
 
-    return false, 'expected ' .. tostring(v) .. ' to be a ' .. tostring(x)
+    return false, 'expected ' .. tostring(v[1]) .. ' to be a ' .. tostring(x)
   end
 
   error('invalid type ' .. tostring(x))
@@ -126,77 +126,77 @@ end
 
 local paths = {
   [''] = { 'to', 'to_not' },
-  to = { 'have', 'equal', 'be', 'exist', 'fail', 'match' },
-  to_not = { 'have', 'equal', 'be', 'exist', 'fail', 'match', chain = function(a) a.negate = not a.negate end },
+  to = { 'have', 'equal', 'be', 'exist', 'fail', 'match', 'approximately' },
+  to_not = {
+    'have', 'equal', 'be', 'exist', 'fail', 'match', 'approximately',
+    chain = function(a) a.negate = not a.negate end
+  },
   a = { test = isa },
   an = { test = isa },
   be = { 'a', 'an', 'truthy', 'falsy',
     test = function(v, x)
-      return v == x, 'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be the same'
+      return v[1] == x, 'expected ' .. tostring(v[1]) .. ' and ' .. tostring(x) .. ' to be the same'
     end
   },
   exist = {
     test = function(v)
-      return v ~= nil, 'expected ' .. tostring(v) .. ' to exist'
+      return v[1] ~= nil, 'expected ' .. tostring(v[1]) .. ' to exist'
     end
   },
   truthy = {
     test = function(v)
-      return v, 'expected ' .. tostring(v) .. ' to be truthy'
+      return v[1], 'expected ' .. tostring(v[1]) .. ' to be truthy'
     end
   },
   falsy = {
     test = function(v)
-      return not v, 'expected ' .. tostring(v) .. ' to be falsy'
+      return not v[1], 'expected ' .. tostring(v[1]) .. ' to be falsy'
     end
   },
   equal = {
     test = function(v, x, eps)
       local comparison = ''
-      local equal = eq(v, x, eps)
+      local equal = eq(v[1], x, eps)
 
-      if (type(v) == 'table' or type(x) == 'table') then
-        comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'LHS: ' .. stringify(v)
+      if (type(v[1]) == 'table' or type(x) == 'table') then
+        comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'LHS: ' .. stringify(v[1])
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'RHS: ' .. stringify(x)
       end
 
-      return equal, 'expected ' .. tostring(v) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison
+      return equal, 'expected ' .. tostring(v[1]) .. ' and ' .. tostring(x) .. ' to be equal' .. comparison
     end
   },
   have = {
     test = function(v, x)
-      if type(v) ~= 'table' then
-        error('expected ' .. tostring(v) .. ' to be a table')
+      if type(v[1]) ~= 'table' then
+        error('expected ' .. tostring(v[1]) .. ' to be a table')
       end
 
-      return has(v, x), 'expected ' .. tostring(v) .. ' to contain ' .. tostring(x)
+      return has(v[1], x), 'expected ' .. tostring(v[1]) .. ' to contain ' .. tostring(x)
     end
   },
   fail = { 'with',
     test = function(v)
-      return not pcall(v), 'expected ' .. tostring(v) .. ' to fail'
+      return not pcall(v[1]), 'expected ' .. tostring(v[1]) .. ' to fail'
     end
   },
   with = {
     test = function(v, pattern)
-      local ok, message = pcall(v)
-      return not ok and message:match(pattern), 'expected ' .. tostring(v) .. ' to fail with error matching "' .. pattern .. '"'
+      local ok, message = pcall(v[1])
+      return not ok and message:match(pattern), 'expected ' .. tostring(v[1]) .. ' to fail with error matching "' .. pattern .. '"'
     end
   },
   match = {
-    test = function(v, p)
-      if type(v) ~= 'string' then v = tostring(v) end
-      local result = string.find(v, p)
-      return result ~= nil, 'expected ' .. v .. ' to match pattern [[' .. p .. ']]'
+    test = function(v, pattern)
+      local value = tostring(v[1])
+      local result = string.find(value, pattern)
+      return result ~= nil, 'expected ' .. value .. ' to match pattern [[' .. pattern .. ']]'
     end
   }
 }
 
-function lust.expect(v)
-  local assertion = {}
-  assertion.val = v
-  assertion.action = ''
-  assertion.negate = false
+function lust.expect(...)
+  local assertion = { ..., action = '', negate = false }
 
   setmetatable(assertion, {
     __index = function(t, k)
@@ -210,7 +210,7 @@ function lust.expect(v)
     end,
     __call = function(t, ...)
       if paths[t.action].test then
-        local res, err = paths[t.action].test(t.val, ...)
+        local res, err = paths[t.action].test(t, ...)
         if assertion.negate then
           res = not res
           err = err:gsub(' to ', ' to not ', 1)
