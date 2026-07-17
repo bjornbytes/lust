@@ -124,6 +124,8 @@ local function stringify(t)
   return '{ ' .. table.concat(strings, ', ') .. ' }'
 end
 
+local unpack = _G.unpack or table.unpack
+
 local paths = {
   [''] = { 'to', 'to_not' },
   to = { 'have', 'equal', 'be', 'exist', 'fail', 'match', 'approximately' },
@@ -177,7 +179,7 @@ local paths = {
   },
   fail = { 'with',
     test = function(v, pattern)
-      local ok, err = pcall(v[1])
+      local ok, err = pcall(unpack(v))
 
       if pattern then
         return not ok and string.find(err, pattern), 'expected ' .. tostring(v[1]) .. ' to fail with error matching "' .. pattern .. '"'
@@ -188,7 +190,7 @@ local paths = {
   },
   with = {
     test = function(v, pattern)
-      local ok, message = pcall(v[1])
+      local ok, message = pcall(unpack(v))
       return not ok and message:match(pattern), 'expected ' .. tostring(v[1]) .. ' to fail with error matching "' .. pattern .. '"'
     end
   },
