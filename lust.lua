@@ -156,7 +156,7 @@ local paths = {
   equal = {
     test = function(v, x, eps)
       local comparison = ''
-      local equal = eq(v[1], x, eps)
+      local equal = eq(v[1], x, eps or v.epsilon)
 
       if (type(v[1]) == 'table' or type(x) == 'table') then
         comparison = comparison .. '\n' .. indent(lust.level + 1) .. 'LHS: ' .. stringify(v[1])
@@ -192,11 +192,14 @@ local paths = {
       local result = string.find(value, pattern)
       return result ~= nil, 'expected ' .. value .. ' to match pattern [[' .. pattern .. ']]'
     end
+  },
+  approximately = { 'be', 'equal',
+    chain = function(a, x) a.epsilon = x or 1e-3 end
   }
 }
 
 function lust.expect(...)
-  local assertion = { ..., action = '', negate = false }
+  local assertion = { ..., action = '', negate = false, epsilon = 0 }
 
   setmetatable(assertion, {
     __index = function(t, k)
@@ -218,6 +221,9 @@ function lust.expect(...)
         if not res then
           error(err or 'unknown failure', 2)
         end
+      elseif paths[t.action].chain then
+        paths[t.action].chain(t, ...)
+        return t
       end
     end
   })
